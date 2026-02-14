@@ -28,3 +28,31 @@ target_include_directories(monoglxr
 )
 
 target_compile_features(monoglxr PUBLIC cxx_std_17)
+
+if(WIN32)
+  option(MONOGLXR_BUILD_DESKTOP_MOCK "Build desktop mock exe" ON)
+else()
+  option(MONOGLXR_BUILD_DESKTOP_MOCK "Build desktop mock exe" OFF)
+endif()
+
+if(MONOGLXR_BUILD_DESKTOP_MOCK)
+  if(WIN32)
+    add_executable(monoglxr_desktop_mock WIN32
+      examples/desktop_mock/main_win32.cpp
+      examples/desktop_mock/win32_mock_backend.cpp
+      examples/desktop_mock/win32_mock_backend.hpp
+      examples/desktop_mock/fonts/u8g2_font_6x10_ascii.hpp
+    )
+
+    target_link_libraries(monoglxr_desktop_mock
+      PRIVATE
+        monoglxr::monoglxr
+        user32
+        gdi32
+    )
+
+    target_compile_features(monoglxr_desktop_mock PRIVATE cxx_std_17)
+  else()
+    message(STATUS "MONOGLXR_BUILD_DESKTOP_MOCK is ON, but platform is not Windows; skipping desktop mock target.")
+  endif()
+endif()
