@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <utility>
 
+#include "libxr_def.hpp"
 #include "present_types.hpp"
 
 namespace LibXR
@@ -20,7 +21,8 @@ class Present
   static_assert(kFramebufferBytes > 0, "kFramebufferBytes must be greater than 0.");
 
   // Backend is owned by value. Use a handle-type backend or a correctly movable backend.
-  Present(Backend backend, DisplayConfig config) : cfg_(config), backend_(std::move(backend))
+  Present(Backend backend, DisplayConfig config)
+      : cfg_(config), backend_(std::move(backend))
   {
     if (cfg_.width == 0 || cfg_.height == 0)
     {
@@ -92,9 +94,8 @@ class Present
     }
 
     bool expected = true;
-    if (!transfer_in_progress_.compare_exchange_strong(expected, false,
-                                                       std::memory_order_acq_rel,
-                                                       std::memory_order_acquire))
+    if (!transfer_in_progress_.compare_exchange_strong(
+            expected, false, std::memory_order_acq_rel, std::memory_order_acquire))
     {
       return LibXR::ErrorCode::STATE_ERR;
     }
@@ -244,13 +245,13 @@ class Present
 
   static std::size_t FramebufferBytes(const DisplayConfig& cfg) noexcept
   {
-    return static_cast<std::size_t>(StrideBytes(cfg)) * static_cast<std::size_t>(cfg.height);
+    return static_cast<std::size_t>(StrideBytes(cfg)) *
+           static_cast<std::size_t>(cfg.height);
   }
 
   void BindDrawSurface() noexcept
   {
-    surface_.Bind(framebuffers_[draw_buffer_index_].data(),
-                  Size{cfg_.width, cfg_.height},
+    surface_.Bind(framebuffers_[draw_buffer_index_].data(), Size{cfg_.width, cfg_.height},
                   StrideBytes(cfg_));
   }
 
@@ -263,7 +264,8 @@ class Present
     surface_.ClearDirtyRect();
   }
 
-  void CopyRegionBetweenBuffers(uint8_t src_index, uint8_t dst_index, Rect region) noexcept
+  void CopyRegionBetweenBuffers(uint8_t src_index, uint8_t dst_index,
+                                Rect region) noexcept
   {
     const Rect CLIPPED = ClipToFrame(region, cfg_);
     if (rect_empty(CLIPPED))
@@ -282,13 +284,13 @@ class Present
     }
 
     const int32_t Y_START = static_cast<int32_t>(CLIPPED.y);
-    const int32_t Y_END = static_cast<int32_t>(CLIPPED.y) + static_cast<int32_t>(CLIPPED.h);
+    const int32_t Y_END =
+        static_cast<int32_t>(CLIPPED.y) + static_cast<int32_t>(CLIPPED.h);
     for (int32_t y = Y_START; y < Y_END; ++y)
     {
       const std::size_t ROW_OFFSET =
           static_cast<std::size_t>(y) * STRIDE + static_cast<std::size_t>(X_BYTE_START);
-      std::copy_n(framebuffers_[src_index].begin() + ROW_OFFSET,
-                  COPY_BYTES,
+      std::copy_n(framebuffers_[src_index].begin() + ROW_OFFSET, COPY_BYTES,
                   framebuffers_[dst_index].begin() + ROW_OFFSET);
     }
   }

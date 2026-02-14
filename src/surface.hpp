@@ -42,19 +42,16 @@ struct Rect
   uint16_t h{0};
 };
 
-inline bool rect_empty(Rect rect) noexcept
-{
-  return rect.w == 0 || rect.h == 0;
-}
+inline bool rect_empty(Rect rect) noexcept { return rect.w == 0 || rect.h == 0; }
 
 inline Rect intersect_rect(Rect a, Rect b) noexcept
 {
   const int32_t LEFT = std::max<int32_t>(a.x, b.x);
   const int32_t TOP = std::max<int32_t>(a.y, b.y);
-  const int32_t RIGHT = std::min<int32_t>(a.x + static_cast<int32_t>(a.w),
-                                          b.x + static_cast<int32_t>(b.w));
-  const int32_t BOTTOM = std::min<int32_t>(a.y + static_cast<int32_t>(a.h),
-                                           b.y + static_cast<int32_t>(b.h));
+  const int32_t RIGHT =
+      std::min<int32_t>(a.x + static_cast<int32_t>(a.w), b.x + static_cast<int32_t>(b.w));
+  const int32_t BOTTOM =
+      std::min<int32_t>(a.y + static_cast<int32_t>(a.h), b.y + static_cast<int32_t>(b.h));
   if (RIGHT <= LEFT || BOTTOM <= TOP)
   {
     return Rect{};
@@ -79,10 +76,10 @@ inline Rect union_rect(Rect a, Rect b) noexcept
   }
   const int32_t LEFT = std::min<int32_t>(a.x, b.x);
   const int32_t TOP = std::min<int32_t>(a.y, b.y);
-  const int32_t RIGHT = std::max<int32_t>(a.x + static_cast<int32_t>(a.w),
-                                          b.x + static_cast<int32_t>(b.w));
-  const int32_t BOTTOM = std::max<int32_t>(a.y + static_cast<int32_t>(a.h),
-                                           b.y + static_cast<int32_t>(b.h));
+  const int32_t RIGHT =
+      std::max<int32_t>(a.x + static_cast<int32_t>(a.w), b.x + static_cast<int32_t>(b.w));
+  const int32_t BOTTOM =
+      std::max<int32_t>(a.y + static_cast<int32_t>(a.h), b.y + static_cast<int32_t>(b.h));
   return Rect{
       static_cast<int16_t>(LEFT),
       static_cast<int16_t>(TOP),
@@ -140,6 +137,9 @@ class Surface
   void DrawText(Point baseline_left, const char* text, const TextStyle& style) noexcept;
   void DrawText(Point baseline_left, const char* text, const TextStyle& style,
                 RasterOp raster_op) noexcept;
+  void DrawTextTopLeft(Point top_left, const char* text, const TextStyle& style) noexcept;
+  void DrawTextTopLeft(Point top_left, const char* text, const TextStyle& style,
+                       RasterOp raster_op) noexcept;
 
   Rect GetDirtyRect() const noexcept;
   void ClearDirtyRect() noexcept;
